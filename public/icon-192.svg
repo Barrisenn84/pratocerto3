@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="nutriGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#nutriGrad)" />
+  <!-- Apple / Leaf nutrition icon -->
+  <path d="M96 55 C100 40, 115 35, 125 38 C120 52, 105 56, 96 55 Z" fill="#34D399" />
+  <path d="M96 68 C80 50, 48 55, 48 85 C48 120, 80 152, 96 156 C112 152, 144 120, 144 85 C144 55, 112 50, 96 68 Z" fill="#FFFFFF" />
+  <circle cx="96" cy="105" r="16" fill="#10B981" />
+</svg>

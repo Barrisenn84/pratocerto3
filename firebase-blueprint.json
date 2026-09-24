@@ -1,0 +1,158 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with personal information and nutritional configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "avatar": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "activityLevel": { "type": "string", "enum": ["sedentary", "lightly_active", "moderately_active", "very_active", "extra_active"] },
+        "goal": { "type": "string", "enum": ["cutting", "bulking", "maintenance", "weight_loss", "hypertrophy"] },
+        "currentWeight": { "type": "number" },
+        "startWeight": { "type": "number" },
+        "targetWeight": { "type": "number" },
+        "height": { "type": "number" },
+        "preferredUnit": { "type": "string", "enum": ["metric", "imperial"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "goal", "currentWeight", "targetWeight", "height"]
+    },
+    "NutritionTargets": {
+      "title": "NutritionTargets",
+      "description": "Daily macronutrient and hydration goals",
+      "type": "object",
+      "properties": {
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fat": { "type": "number" },
+        "waterMl": { "type": "number" },
+        "source": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["calories", "protein", "carbs", "fat"]
+    },
+    "Meal": {
+      "title": "Meal",
+      "description": "A food consumption record logged by the user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack", "post_workout", "other"] },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "photo": { "type": "string" },
+        "aiAnalyzed": { "type": "boolean" },
+        "confidenceScore": { "type": "number" },
+        "notes": { "type": "string" },
+        "items": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "type", "date", "time"]
+    },
+    "BodyMeasurement": {
+      "title": "BodyMeasurement",
+      "description": "Anthropometric and body composition tracking entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "weight": { "type": "number" },
+        "bodyFat": { "type": "number" },
+        "chest": { "type": "number" },
+        "waist": { "type": "number" },
+        "hips": { "type": "number" },
+        "arms": { "type": "number" },
+        "thighs": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "date", "weight"]
+    },
+    "EvolutionPhoto": {
+      "title": "EvolutionPhoto",
+      "description": "Progress photo taken or uploaded by the user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "pose": { "type": "string", "enum": ["front", "side", "back", "other"] },
+        "weight": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "date", "photoUrl"]
+    },
+    "CustomFood": {
+      "title": "CustomFood",
+      "description": "Custom food item saved by user to their database",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fat": { "type": "number" },
+        "servingSize": { "type": "number" },
+        "servingUnit": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "name", "calories", "protein", "carbs", "fat"]
+    },
+    "WaterLog": {
+      "title": "WaterLog",
+      "description": "Daily water intake entry",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "amountMl": { "type": "number" },
+        "targetMl": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["date", "amountMl"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and target metadata owned by authenticated user"
+    },
+    "/users/{userId}/meals/{mealId}": {
+      "schema": "Meal",
+      "description": "Individual meals logged by the user"
+    },
+    "/users/{userId}/measurements/{measurementId}": {
+      "schema": "BodyMeasurement",
+      "description": "Body measurement and anthropometric logs"
+    },
+    "/users/{userId}/photos/{photoId}": {
+      "schema": "EvolutionPhoto",
+      "description": "Progress evolution photos"
+    },
+    "/users/{userId}/custom_foods/{foodId}": {
+      "schema": "CustomFood",
+      "description": "User-defined custom food items"
+    },
+    "/users/{userId}/progress/{progressId}": {
+      "schema": "BodyMeasurement",
+      "description": "Legacy progress log compatibility"
+    },
+    "/users/{userId}/water/{date}": {
+      "schema": "WaterLog",
+      "description": "Daily water intake logged by the user"
+    }
+  }
+}

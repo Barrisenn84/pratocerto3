@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Initial connection verification doc
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /meals/{mealId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /measurements/{measurementId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /photos/{photoId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /custom_foods/{foodId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /progress/{progressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /water/{date} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /{allSubcollections=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

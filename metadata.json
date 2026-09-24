@@ -1,0 +1,6 @@
+{
+  "name": "NutriMacro - Nutrição, Macros & Evolução",
+  "description": "Aplicação web inteligente para registro simplificado de alimentação, cálculo automático de macronutrientes, análise visual e acompanhamento da evolução corporal.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
