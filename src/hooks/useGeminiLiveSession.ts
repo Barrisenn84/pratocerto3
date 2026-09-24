@@ -166,6 +166,15 @@ export function useGeminiLiveSession(options: UseGeminiLiveOptions = {}) {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
+      let connTimeout: any = setTimeout(() => {
+        console.warn('[useGeminiLive] Connection timed out (10s)');
+        setErrorMessage('Tempo limite de conexão esgotado com o servidor de voz. Você pode alternar para a aba "Comandos" no topo para falar com o Gemini com resposta imediata!');
+        setStatus('error');
+        try {
+          ws.close();
+        } catch {}
+      }, 10000);
+
       ws.onopen = () => {
         console.log('[useGeminiLive] WS connected. Sending init...');
         ws.send(
@@ -182,6 +191,7 @@ export function useGeminiLiveSession(options: UseGeminiLiveOptions = {}) {
           const msg = JSON.parse(event.data);
 
           if (msg.type === 'ready') {
+            clearTimeout(connTimeout);
             setStatus('listening');
           } else if (msg.type === 'toolCall' && Array.isArray(msg.functionCalls)) {
             // Execute real database tool calls on the client
@@ -214,6 +224,7 @@ export function useGeminiLiveSession(options: UseGeminiLiveOptions = {}) {
             });
             setStatus('listening');
           } else if (msg.type === 'error') {
+            clearTimeout(connTimeout);
             console.error('[Gemini Live WS Server Error]:', msg.error);
             setErrorMessage(msg.error || 'Erro na sessão Live');
             setStatus('error');
@@ -225,12 +236,14 @@ export function useGeminiLiveSession(options: UseGeminiLiveOptions = {}) {
       };
 
       ws.onerror = (e) => {
+        clearTimeout(connTimeout);
         console.warn('[Gemini Live WS Error]:', e);
         setErrorMessage('Falha na conexão em tempo real com o servidor.');
         setStatus('error');
       };
 
       ws.onclose = () => {
+        clearTimeout(connTimeout);
         setStatus('disconnected');
       };
 

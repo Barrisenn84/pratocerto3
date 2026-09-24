@@ -267,7 +267,7 @@ export const GeminiLiveVoiceStudio: React.FC<GeminiLiveVoiceStudioProps> = ({
           {status === 'connecting' && (
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold animate-pulse">
               <Sparkles className="w-3.5 h-3.5 animate-spin" />
-              Conectando com Gemini 3.8 Live...
+              Conectando com Gemini Live...
             </span>
           )}
           {status === 'listening' && (
@@ -362,8 +362,16 @@ export const GeminiLiveVoiceStudio: React.FC<GeminiLiveVoiceStudioProps> = ({
 
         {/* Error Notification */}
         {errorMessage && (
-          <div className="mt-3 max-w-md px-3.5 py-2 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs text-center z-10">
-            {errorMessage}
+          <div className="mt-3 max-w-md px-3.5 py-2.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs text-center z-10 space-y-1.5">
+            <p>{errorMessage}</p>
+            {onSwitchToCommandMode && (
+              <button
+                onClick={onSwitchToCommandMode}
+                className="inline-block mt-1 px-3 py-1 bg-rose-800 hover:bg-rose-700 text-white rounded-lg font-medium text-[11px] transition-colors cursor-pointer"
+              >
+                Alternar para Modo Comandos (Voz Instantânea)
+              </button>
+            )}
           </div>
         )}
       </div>

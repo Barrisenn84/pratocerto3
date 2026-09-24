@@ -13,11 +13,11 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const PROMPT_VERSION_FOOD = 'food-analysis-v2';
 const PROMPT_VERSION_COACH = 'coach-v1';
 
-// Lazy initialized Gemini client
+// Lazy initialized Gemini client with built-in active key fallback
 let genAIInstance: GoogleGenAI | null = null;
 function getGenAI(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!apiKey || apiKey.trim().length === 0) {
     return null;
   }
   if (!genAIInstance) {
@@ -40,7 +40,7 @@ async function generateContentWithFallback(
     contents: any;
     config?: any;
   },
-  models: string[] = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
+  models: string[] = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-pro']
 ): Promise<{ text: string; modelUsed: string }> {
   let lastError: any = null;
   for (const model of models) {
@@ -197,7 +197,7 @@ DIRETRIZES CRÍTICAS ANTI-ALUCINAÇÃO (SIGA RIGOROSAMENTE):
             },
           },
         },
-        ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
+        ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-pro']
       );
 
       const latencyMs = Date.now() - startTime;
@@ -343,7 +343,7 @@ ${contextStr}`;
             maxOutputTokens: 600,
           },
         },
-        ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
+        ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-pro']
       );
 
       const reply = textOutput || 'Não consegui formular uma resposta no momento.';
@@ -602,7 +602,7 @@ DIRETRIZES DE ÁUDIO:
           },
           },
         },
-        ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
+        ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-pro']
       );
 
       const timeoutPromise = new Promise((_, reject) =>
@@ -816,7 +816,7 @@ ${contextSummary}`;
         const validVoices = ['Zephyr', 'Puck', 'Kore', 'Fenrir', 'Charon'];
         const chosenVoice = validVoices.includes(voiceName) ? voiceName : 'Zephyr';
 
-        session = await currentAi.live.connect({
+        const connectPromise = currentAi.live.connect({
           model: 'gemini-2.0-flash-exp',
           config: {
             responseModalities: [Modality.AUDIO],
@@ -987,6 +987,11 @@ ${contextSummary}`;
             },
           },
         });
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Tempo limite excedido ao conectar com a API Gemini Live (8s). O servidor de voz pode estar temporariamente sobrecarregado.')), 8000)
+        );
+        session = await Promise.race([connectPromise, timeoutPromise]);
 
         isConnecting = false;
         if (clientWs.readyState === WebSocket.OPEN) {
