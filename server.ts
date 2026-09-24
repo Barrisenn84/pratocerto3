@@ -817,9 +817,9 @@ ${contextSummary}`;
         const chosenVoice = validVoices.includes(voiceName) ? voiceName : 'Zephyr';
 
         const connectPromise = currentAi.live.connect({
-          model: 'gemini-2.0-flash-exp',
+          model: 'gemini-2.5-flash-native-audio-latest',
           config: {
-            responseModalities: [Modality.AUDIO, Modality.TEXT],
+            responseModalities: [Modality.AUDIO],
             speechConfig: {
               voiceConfig: {
                 prebuiltVoiceConfig: {
@@ -999,7 +999,7 @@ ${contextSummary}`;
           clientWs.send(
             JSON.stringify({
               type: 'ready',
-              model: 'gemini-2.0-flash-exp',
+              model: 'gemini-2.5-flash-native-audio-latest',
               voice: chosenVoice,
             })
           );
