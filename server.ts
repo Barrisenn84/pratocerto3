@@ -817,9 +817,9 @@ ${contextSummary}`;
         const chosenVoice = validVoices.includes(voiceName) ? voiceName : 'Zephyr';
 
         const connectPromise = currentAi.live.connect({
-          model: 'gemini-2.0-flash-exp',
+          model: 'gemini-live-2.5-flash-preview',
           config: {
-            responseModalities: [Modality.AUDIO],
+            responseModalities: [Modality.AUDIO, Modality.TEXT],
             speechConfig: {
               voiceConfig: {
                 prebuiltVoiceConfig: {
@@ -927,13 +927,14 @@ ${contextSummary}`;
                       output: {
                         success: true,
                         status: 'saved_to_database',
-                        message: `Operação ${fc.name} executada e salva no banco de dados com sucesso.`,
+                        message: `Operacao ${fc.name} executada e salva no banco de dados com sucesso.`,
                       },
                     },
                     id: fc.id,
                   }));
 
-                  session.sendRealtimeInput({
+                  // Use session.send with toolResponse (correct SDK format for Live API)
+                  session.send({
                     toolResponse: {
                       functionResponses,
                     },
@@ -989,7 +990,7 @@ ${contextSummary}`;
         });
 
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Tempo limite excedido ao conectar com a API Gemini Live (8s). O servidor de voz pode estar temporariamente sobrecarregado.')), 8000)
+          setTimeout(() => reject(new Error('Tempo limite excedido ao conectar com a API Gemini Live (20s). O servidor de voz pode estar temporariamente sobrecarregado.')), 20000)
         );
         session = await Promise.race([connectPromise, timeoutPromise]);
 
@@ -1035,15 +1036,20 @@ ${contextSummary}`;
         }
 
         if (msg.type === 'audio' && msg.audio) {
+          // Send raw PCM audio via realtimeInput (correct field: media)
           session.sendRealtimeInput({
-            audio: {
+            media: {
               data: msg.audio,
               mimeType: msg.mimeType || 'audio/pcm;rate=16000',
             },
           });
         } else if (msg.type === 'text' && msg.text) {
-          session.sendRealtimeInput({
-            text: msg.text,
+          // Send text via client content turn
+          session.send({
+            clientContent: {
+              turns: [{ role: 'user', parts: [{ text: msg.text }] }],
+              turnComplete: true,
+            },
           });
         }
       } catch (e: any) {
