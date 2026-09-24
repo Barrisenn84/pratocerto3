@@ -817,7 +817,7 @@ ${contextSummary}`;
         const chosenVoice = validVoices.includes(voiceName) ? voiceName : 'Zephyr';
 
         const connectPromise = currentAi.live.connect({
-          model: 'gemini-live-2.5-flash-preview',
+          model: 'gemini-2.0-flash-exp',
           config: {
             responseModalities: [Modality.AUDIO, Modality.TEXT],
             speechConfig: {
@@ -933,12 +933,12 @@ ${contextSummary}`;
                     id: fc.id,
                   }));
 
-                  // Use session.send with toolResponse (correct SDK format for Live API)
-                  session.send({
-                    toolResponse: {
-                      functionResponses,
-                    },
-                  });
+                  // Use sendToolResponse or fallback to sendRealtimeInput
+                  if (typeof session.sendToolResponse === 'function') {
+                    session.sendToolResponse({ functionResponses });
+                  } else {
+                    session.sendRealtimeInput({ toolResponse: { functionResponses } });
+                  }
                 } catch (toolErr) {
                   console.warn('Error sending toolResponse back to Live session:', toolErr);
                 }
@@ -1036,21 +1036,23 @@ ${contextSummary}`;
         }
 
         if (msg.type === 'audio' && msg.audio) {
-          // Send raw PCM audio via realtimeInput (correct field: media)
+          // Send PCM audio via realtimeInput
           session.sendRealtimeInput({
-            media: {
+            audio: {
               data: msg.audio,
               mimeType: msg.mimeType || 'audio/pcm;rate=16000',
             },
           });
         } else if (msg.type === 'text' && msg.text) {
-          // Send text via client content turn
-          session.send({
-            clientContent: {
+          // Send text via sendClientContent (SDK v2.x)
+          if (typeof session.sendClientContent === 'function') {
+            session.sendClientContent({
               turns: [{ role: 'user', parts: [{ text: msg.text }] }],
               turnComplete: true,
-            },
-          });
+            });
+          } else {
+            session.sendRealtimeInput({ text: msg.text });
+          }
         }
       } catch (e: any) {
         console.warn('[Gemini Live message parse error]:', e?.message || e);
