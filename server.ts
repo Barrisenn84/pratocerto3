@@ -40,7 +40,7 @@ async function generateContentWithFallback(
     contents: any;
     config?: any;
   },
-  models: string[] = ['gemini-2.5-flash', 'gemini-3.8-flash']
+  models: string[] = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
 ): Promise<{ text: string; modelUsed: string }> {
   let lastError: any = null;
   for (const model of models) {
@@ -92,12 +92,12 @@ async function startServer() {
 
     const ai = getGenAI();
 
-    // If API key is not configured, gracefully indicate fallback
+    // If API key is not configured, clearly inform the client
     if (!ai) {
-      res.json({
+      res.status(500).json({
         success: false,
-        usedFallback: true,
-        reason: 'GEMINI_API_KEY não configurada no ambiente.',
+        usedFallback: false,
+        error: 'Chave GEMINI_API_KEY não configurada no servidor. É necessário configurar uma chave de API válida no painel de ambiente do Railway (ex: AIzaSy...).',
         promptVersion: PROMPT_VERSION_FOOD,
         latencyMs: Date.now() - startTime,
       });
@@ -117,17 +117,25 @@ async function startServer() {
         }
       }
 
-      const prompt = `Você é um nutricionista esportivo de precisão e especialista em análise visual de alimentos.
-Analise detalhadamente a foto do prato/refeição fornecida e identifique todos os alimentos distintos visíveis.
-Para cada alimento:
-1. Nome em português claro (ex: "Peito de Frango Grelhado", "Arroz Branco Cozido", "Feijão Preto").
-2. Quantidade estimada em gramas (g) ou ml, considerando a densidade volumétrica no prato.
-3. Unidade ('g' ou 'ml').
-4. Estimativa nutricional rigorosa da porção identificada: Calorias (kcal), Proteína (g), Carboidratos (g), Gorduras (g).
-5. Nível de confiança: 'high' (alimento evidente com volume bem visível), 'medium' (densidade estimada), 'low' (presença de molho, óleo ou ingredientes misturados).
-6. Breve justificativa visual da estimativa.
+      const prompt = `Você é um nutricionista esportivo de precisão e especialista em visão computacional de alimentos.
+Analise com fidelidade visual ABSOLUTA a fotografia enviada.
 
-Seja conservador e preciso nas estimativas de macros. Calcule as calorias totais com base na soma dos macronutrientes (P*4 + C*4 + G*9).`;
+DIRETRIZES CRÍTICAS ANTI-ALUCINAÇÃO (SIGA RIGOROSAMENTE):
+1. IDENTIFICAÇÃO ESTRITA: Identifique EXCLUSIVAMENTE o que está presente e visível na imagem. NUNCA invente acompanhamentos como arroz, feijão, carnes ou saladas se eles não estiverem explicitamente visíveis na imagem.
+2. FRUTAS OU ITENS ISOLADOS:
+   - Se a foto mostrar bananas, maçãs, laranjas ou qualquer fruta isolada, liste APENAS a fruta!
+   - Se for uma PENCA OU CACHO DE BANANAS / FRUTAS:
+     * No campo "name", identifique a fruta com clareza (ex: "Banana Prata", "Banana Nanica", "Banana da Terra").
+     * No campo "estimatedQuantity", calcule os macronutrientes para UMA porção individual consumível padrão (ex: 1 banana média de aproximadamente 90g a 110g).
+     * No campo "reasoning", mencione explicitamente que a foto contém uma penca/cacho de bananas e que os valores nutricionais foram calculados para 1 unidade consumível média (~100g).
+3. PRATOS COMPOSTOS: Se for um prato com vários alimentos preparados, identifique cada alimento individualmente com suas proporções reais.
+4. Para cada alimento identificado:
+   - Nome em português claro (ex: "Banana Prata", "Peito de Frango Grelhado", "Maçã Fuji").
+   - Quantidade estimada em gramas (g) ou ml.
+   - Unidade ('g' ou 'ml').
+   - Estimativa nutricional rigorosa: Calorias (kcal), Proteína (g), Carboidratos (g), Gorduras (g).
+   - Nível de confiança: 'high' (visível e nítido), 'medium' ou 'low'.
+   - Justificativa visual realista.`;
 
       const { text: textOutput, modelUsed } = await generateContentWithFallback(
         ai,
@@ -144,7 +152,7 @@ Seja conservador e preciso nas estimativas de macros. Calcule as calorias totais
             },
           ],
           config: {
-            temperature: 0.2,
+            temperature: 0.1,
             responseMimeType: 'application/json',
             responseSchema: {
               type: Type.OBJECT,
@@ -189,7 +197,7 @@ Seja conservador e preciso nas estimativas de macros. Calcule as calorias totais
             },
           },
         },
-        ['gemini-2.5-flash', 'gemini-3.8-flash']
+        ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
       );
 
       const latencyMs = Date.now() - startTime;
@@ -226,10 +234,10 @@ Seja conservador e preciso nas estimativas de macros. Calcule as calorias totais
       });
     } catch (err: any) {
       console.error('[Gemini Food Vision Error]:', err?.message || err);
-      res.json({
+      res.status(500).json({
         success: false,
-        usedFallback: true,
-        error: err?.message || 'Falha ao processar a imagem com a IA.',
+        usedFallback: false,
+        error: err?.message || 'Falha ao processar a imagem com a IA Gemini. Verifique a chave de API.',
         promptVersion: PROMPT_VERSION_FOOD,
         latencyMs: Date.now() - startTime,
       });
@@ -335,7 +343,7 @@ ${contextStr}`;
             maxOutputTokens: 600,
           },
         },
-        ['gemini-2.5-flash', 'gemini-3.8-flash']
+        ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
       );
 
       const reply = textOutput || 'Não consegui formular uma resposta no momento.';
@@ -594,7 +602,7 @@ DIRETRIZES DE ÁUDIO:
           },
           },
         },
-        ['gemini-2.5-flash', 'gemini-3.8-flash']
+        ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro']
       );
 
       const timeoutPromise = new Promise((_, reject) =>
@@ -809,7 +817,7 @@ ${contextSummary}`;
         const chosenVoice = validVoices.includes(voiceName) ? voiceName : 'Zephyr';
 
         session = await currentAi.live.connect({
-          model: 'gemini-3.8-live',
+          model: 'gemini-2.0-flash-exp',
           config: {
             responseModalities: [Modality.AUDIO],
             speechConfig: {
@@ -985,7 +993,7 @@ ${contextSummary}`;
           clientWs.send(
             JSON.stringify({
               type: 'ready',
-              model: 'gemini-3.8-live',
+              model: 'gemini-2.0-flash-exp',
               voice: chosenVoice,
             })
           );
@@ -997,7 +1005,7 @@ ${contextSummary}`;
           clientWs.send(
             JSON.stringify({
               type: 'error',
-              error: err?.message || 'Falha ao conectar ao Gemini 3.8 Live.',
+              error: err?.message || 'Falha ao conectar ao Gemini Live.',
             })
           );
         }

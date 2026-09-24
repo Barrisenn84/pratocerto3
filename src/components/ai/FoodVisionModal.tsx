@@ -189,9 +189,9 @@ export const FoodVisionModal: React.FC<FoodVisionModalProps> = ({
       setAnalysisResult(result);
       setReviewedItems(result.items);
       setStep('review');
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI analysis error', err);
-      showToast('Falha na análise visual. Tente novamente ou use o registro manual.');
+      showToast(err?.message || 'Falha na análise visual com o Gemini. Verifique a conexão e a chave de API.');
       setStep('select');
     }
   };
