@@ -188,6 +188,16 @@ export const GeminiLiveVoiceStudio: React.FC<GeminiLiveVoiceStudioProps> = ({
     }
   }, [conversationLogs, liveTranscript]);
 
+  // Auto-redirect to rock-solid command voice mode on connection failure
+  useEffect(() => {
+    if (errorMessage && onSwitchToCommandMode) {
+      const timer = setTimeout(() => {
+        onSwitchToCommandMode();
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage, onSwitchToCommandMode]);
+
   const handleSendTyped = (e: React.FormEvent) => {
     e.preventDefault();
     if (!typedInput.trim()) return;

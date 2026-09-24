@@ -66,7 +66,7 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({ isOpen
     currentPage,
   } = useApp();
 
-  const [activeVoiceTab, setActiveVoiceTab] = useState<'live' | 'commands'>('live');
+  const [activeVoiceTab, setActiveVoiceTab] = useState<'live' | 'commands'>('commands');
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
@@ -781,7 +781,10 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({ isOpen
         {activeVoiceTab === 'live' ? (
           <GeminiLiveVoiceStudio
             onClose={onClose}
-            onSwitchToCommandMode={() => setActiveVoiceTab('commands')}
+            onSwitchToCommandMode={() => {
+              setActiveVoiceTab('commands');
+              showToast('Assistente de Voz Inteligente (Gemini 3.6 Flash) ativado!');
+            }}
           />
         ) : (
           <>
