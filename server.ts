@@ -9,7 +9,7 @@ import { parseVoiceCommandLocally } from './server/voiceCommandParser';
 
 dotenv.config();
 
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const PROMPT_VERSION_FOOD = 'food-analysis-v2';
 const PROMPT_VERSION_COACH = 'coach-v1';
 
